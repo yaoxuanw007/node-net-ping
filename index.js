@@ -70,6 +70,7 @@ util.inherits (TimeExceededError, Error);
 function Session (options) {
 	this.retries = (options && options.retries) ? options.retries : 1;
 	this.timeout = (options && options.timeout) ? options.timeout : 2000;
+	this.localAddress = (options && options.localAddress) ? options.localAddress : null;
 
 	this.packetSize = (options && options.packetSize) ? options.packetSize : 16;
 
@@ -151,7 +152,11 @@ Session.prototype.getSocket = function () {
 	
 	this.ttl = null;
 	this.setTTL (this.defaultTTL);
-	
+
+	if (this.localAddress) {
+		this.bindLocalAddress(this.localAddress);
+	}
+
 	return this.socket;
 };
 
@@ -426,6 +431,13 @@ Session.prototype.setTTL = function (ttl) {
 			: raw.SocketLevel.IPPROTO_IP;
 	this.getSocket ().setOption (level, raw.SocketOption.IP_TTL, ttl);
 	this.ttl = ttl;
+}
+
+Session.prototype.bindLocalAddress = function (address) {
+	var level = this.addressFamily == raw.AddressFamily.IPv6
+			? raw.SocketLevel.IPPROTO_IPV6
+			: raw.SocketLevel.IPPROTO_IP;
+	this.getSocket ().setOption (level, raw.SocketOption.SO_BINDTODEVICE, address);
 }
 
 Session.prototype.toBuffer = function (req) {
