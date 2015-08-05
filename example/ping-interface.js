@@ -2,7 +2,7 @@
 var ping = require ("../");
 
 var printUsage = function () {
-	console.log ("usage: node ping [-I <localAddress>] <target> [<target> ...]");
+	console.log ("usage: node ping [-I <interface>] <target> [<target> ...]");
 }
 
 if (process.argv.length < 3) {
@@ -11,13 +11,13 @@ if (process.argv.length < 3) {
 }
 
 var targets = [],
-		localAddress = null;
+		interface = null;
 
 for (var i = 2; i < process.argv.length; i++) {
 	if (process.argv[i] === '-I') {
 		i++;
 		if (i < process.argv.length) {
-			localAddress = process.argv[i];
+			interface = process.argv[i];
 		} else {
 			printUsage();
 			process.exit (-1);
@@ -30,7 +30,7 @@ for (var i = 2; i < process.argv.length; i++) {
 var options = {
 	retries: 1,
 	timeout: 2000,
-	localAddress: localAddress
+	interface: interface
 };
 
 var session = ping.createSession (options);

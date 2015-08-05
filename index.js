@@ -72,8 +72,8 @@ function Session (options) {
 	this.timeout = (options && options.timeout) ? options.timeout : 2000;
 
 	var isLinux = /^linux/.test(process.platform);
-	this.localAddress = (options && options.localAddress && isLinux) 
-		? options.localAddress 
+	this.interface = (options && options.interface && isLinux)
+		? options.interface
 		: null;
 
 	this.packetSize = (options && options.packetSize) ? options.packetSize : 16;
@@ -157,8 +157,8 @@ Session.prototype.getSocket = function () {
 	this.ttl = null;
 	this.setTTL (this.defaultTTL);
 
-	if (this.localAddress) {
-		this.bindLocalAddress(this.localAddress);
+	if (this.interface) {
+		this.bindInterface(this.interface);
 	}
 
 	return this.socket;
@@ -437,11 +437,12 @@ Session.prototype.setTTL = function (ttl) {
 	this.ttl = ttl;
 }
 
-Session.prototype.bindLocalAddress = function (address) {
-	var level = this.addressFamily == raw.AddressFamily.IPv6
-			? raw.SocketLevel.IPPROTO_IPV6
-			: raw.SocketLevel.IPPROTO_IP;
-	this.getSocket ().setOption (level, raw.SocketOption.SO_BINDTODEVICE, address);
+Session.prototype.bindInterface = function (interface) {
+	if (interface) {
+		var level = raw.SocketLevel.SOL_SOCKET,
+				buffer = new Buffer(interface);
+		this.getSocket ().setOption (level, raw.SocketOption.SO_BINDTODEVICE, buffer, buffer.length);
+	}
 }
 
 Session.prototype.toBuffer = function (req) {
