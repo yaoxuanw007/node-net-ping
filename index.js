@@ -70,7 +70,11 @@ util.inherits (TimeExceededError, Error);
 function Session (options) {
 	this.retries = (options && options.retries) ? options.retries : 1;
 	this.timeout = (options && options.timeout) ? options.timeout : 2000;
-	this.localAddress = (options && options.localAddress) ? options.localAddress : null;
+
+	var isLinux = /^linux/.test(process.platform);
+	this.localAddress = (options && options.localAddress && isLinux) 
+		? options.localAddress 
+		: null;
 
 	this.packetSize = (options && options.packetSize) ? options.packetSize : 16;
 
